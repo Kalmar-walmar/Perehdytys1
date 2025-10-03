@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trekno</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+            color: #333;
+        }
+        @keyframes shake {
+            0% { transform: translateY(0); }
+            10% { transform: translateY(-12px); }
+            20% { transform: translateY(12px); }
+            30% { transform: translateY(-12px); }
+            40% { transform: translateY(12px); }
+            50% { transform: translateY(-6px); }
+            60% { transform: translateY(6px); }
+            70% { transform: translateY(-3px); }
+            80% { transform: translateY(3px); }
+            90% { transform: translateY(0); }
+            100% { transform: translateY(0); }
+        }
+        .shake {
+            animation: shake 0.7s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+        a:hover {
+            color: #007BFF;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header img.logo {
+            height: 50px;
+            margin-right: 15px;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        nav {
+            background-color: #007BFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            color: white;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            margin-right: 25px;
+        }
+        nav ul li:last-child {
+            margin-right: 0;
+        }
+        nav ul li a {
+            color: white;
+            font-weight: 600;
+            padding: 8px 0;
+            display: block;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #ffc107;
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+        }
+        .icons img {
+            height: 24px;
+            cursor: pointer;
+            filter: invert(100%);
+            transition: filter 0.3s ease;
+        }
+        .icons img:hover {
+            filter: invert(75%) sepia(100%) saturate(500%) hue-rotate(350deg);
+        }
+
+        .intro {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px 20px;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .products {
+            max-width: 1100px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        .product-card img {
+            max-width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        .product-card h3 {
+            font-size: 1.2rem;
+            margin: 10px 0 5px;
+        }
+        .product-card .price {
+            font-weight: 700;
+            color: #007BFF;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .product-card button {
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .product-card button:hover {
+            background-color: #0056b3;
+        }
+
+        .cart-modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            transition: opacity 0.7s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .cart-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+            .cart-content {
+                transition: transform 0.7s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.7s ease;
+                transform: translateY(-40px) scale(0.95);
+                opacity: 0;
+            }
+            .cart-modal.open .cart-content {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+        }
+        .cart-content {
+            background: #fff;
+            margin: 8% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .cart-content h2 {
+            margin-top: 0;
+        }
+        .close-btn {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .cart-content ul {
+            list-style: none;
+            padding: 0;
+        }
+        .cart-content li {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remove-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .totals {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .checkout-btn {
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+            background: green;
+            color: white;
+            font-size: 1rem;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .checkout-btn:hover {
+            background: darkgreen;
+        }
+
+        footer {
+            background-color: #222;
+            color: #ccc;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 60px;
+        }
+        footer nav ul {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            padding-bottom: 10px;
+        }
+        footer nav ul li a {
+            color: #ccc;
+            font-weight: 500;
+        }
+        footer nav ul li a:hover {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="Logoplaceholder1.png" alt="Kaupan logo" class="logo" />
+    <h1>Trekno</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li style="position:relative;">
+                <a href="#" id="kategoriatBtn">Kategoriat</a>
+                <ul id="kategoriatDropdown" style="display:none;position:absolute;left:0;top:100%;background:#fff;color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.15);padding:0;margin:0;list-style:none;min-width:180px;z-index:2001;">
+                    <li style="border-bottom:1px solid #eee;"><a href="#" style="color:#333;padding:10px 18px;display:block;">Elektroniikka</a></li>
+                    <li style="border-bottom:1px solid #eee;"><a href="#" style="color:#333;padding:10px 18px;display:block;">Älylaitteet</a></li>
+                    <li style="border-bottom:1px solid #eee;"><a href="#" style="color:#333;padding:10px 18px;display:block;">Tarvikkeet</a></li>
+                    <li><a href="#" style="color:#333;padding:10px 18px;display:block;">Kaikki tuotteet</a></li>
+                </ul>
+            </li>
+
+            <li><a href="#" id="yhteystiedotBtn">Yhteystiedot</a></li>
+            <li><a href="#" id="tietoaMeistaBtn">Tietoa meistä</a></li>
+            <li><a href="#" id="kirjauduBtn">Kirjaudu sisään</a></li>
+        </ul>
+        <div class="icons">
+            <img src="cart-icon.png" alt="Ostoskori" title="Ostoskori" id="cartBtn"/>
+            <input type="text" id="searchInput" placeholder="Hae tuotteita..." style="padding:6px 10px;border-radius:16px;border:1px solid #ccc;font-size:1rem;width:140px;">
+            <button id="searchBtn" style="background:none;border:none;cursor:pointer;padding:0 0 0 8px;">
+                <img src="search-icon.png" alt="Haku" title="Haku" style="height:24px;filter:invert(100%);">
+            </button>
+        </div>
+    </nav>
+
+    <!-- Kirjautuminen Modal navin ulkopuolelle -->
+    <div id="kirjauduModal" class="cart-modal">
+        <div class="cart-content">
+            <span class="close-btn" id="closeKirjaudu">&times;</span>
+            <h2>Kirjautuminen</h2>
+            <p style="margin-bottom:18px;font-weight:500;">Syötä sähköpostiosoitteesi ja salasanasi kirjautuaksesi sisään.</p>
+            <form id="kirjauduForm">
+                <label for="loginEmail" style="font-weight:600;">Sähköposti</label><br>
+                <input type="email" id="loginEmail" name="loginEmail" required style="width:100%;padding:8px;margin-bottom:14px;" placeholder="esim. nimi@email.com"><br>
+                <label for="loginPassword" style="font-weight:600;">Salasana</label><br>
+                <input type="password" id="loginPassword" name="loginPassword" required style="width:100%;padding:8px;margin-bottom:14px;" placeholder="Salasanasi"><br>
+                <button type="submit" class="checkout-btn">Kirjaudu sisään</button>
+                <div id="kirjauduError" style="color:red;margin-top:10px;display:none;"></div>
+            </form>
+        </div>
+    </div>
+  
+    </nav>
+
+    <!-- Yhteystiedot Modal oikeasti navin ulkopuolelle -->
+    <div id="yhteystiedotModal" class="cart-modal">
+        <div class="cart-content">
+            <span class="close-btn" id="closeYhteystiedot">&times;</span>
+            <h2>Yhteystiedot</h2>
+            <p>Puhelin: 040 123 4567<br>Sähköposti: info@trekno.fi</p>
+        </div>
+    </div>
+
+    <section class="intro" style="display:block;">
+        <p>
+            <strong>Tervetuloa Treknoon!</strong><br><br>
+            Meiltä löydät laajan valikoiman huipputuotteita arjen helpottamiseen ja
+            viihtymiseen – elektroniikkaa, älylaitteita ja tarvikkeita kotiin ja vapaa-aikaan.
+            Tarjoamme vain laadukkaita brändejä kilpailukykyiseen hintaan.
+            <br><br>
+            Tavoitteenamme on tehdä ostokokemuksestasi helppoa, nopeaa ja turvallista –
+            jotta sinä voit keskittyä nauttimaan ostoksistasi.
+            Klikkaa tuotteita ostoskoriin ja koe sujuva verkkokauppaelämys!
+        </p>
+    </section>
+
+    <section class="about-section" style="display:none;max-width:900px;margin:30px auto;padding:25px 20px;font-size:1.2rem;line-height:1.7;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-radius:8px;">
+        <h2>Tietoa meistä</h2>
+        <p>
+            Trekno on suomalainen verkkokauppa, joka on perustettu vuonna 2023 intohimosta teknologiaan ja asiakaspalveluun. Haluamme tarjota asiakkaillemme vain parasta – laadukkaita tuotteita, nopeita toimituksia ja ystävällistä palvelua.
+        </p>
+        <p>
+            Valikoimastamme löydät:
+            <ul>
+                <li>Elektroniikkaa ja älylaitteita arkeen ja vapaa-aikaan</li>
+                <li>Laadukkaat tarvikkeet ja lisäosat</li>
+                <li>Nopeat toimitukset kaikkialle Suomeen</li>
+                <li>Turvalliset maksutavat ja selkeät palautusehdot</li>
+            </ul>
+        </p>
+        <p>
+            Olemme sitoutuneet kehittämään palveluamme jatkuvasti ja kuuntelemaan asiakkaidemme toiveita. Trekno on enemmän kuin pelkkä kauppa – se on yhteisö, jossa teknologia kohtaa arjen tarpeet helposti ja luotettavasti.
+        </p>
+        <p>
+            Kiitos kun asioit meillä!<br>
+            <em>- Trekno-tiimi</em>
+        </p>
+    </section>
+
+    <section class="products">
+        <article class="product-card" data-kategoria="Elektroniikka">
+            <img src="tuote1.png" alt="Tuote1" />
+            <h3>Langaton kuulokemikrofoni</h3>
+            <div class="price">59,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+
+        <article class="product-card" data-kategoria="Älylaitteet">
+            <img src="tuote 2.png" alt="Tuote2" />
+            <h3>Älykäs sykemittari</h3>
+            <div class="price">79,00 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+
+        <article class="product-card" data-kategoria="Elektroniikka">
+            <img src="tuote 3.png" alt="Tuote3" />
+            <h3>Bluetooth-kaiutin</h3>
+            <div class="price">39,50 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+
+        <article class="product-card" data-kategoria="Tarvikkeet">
+            <img src="tuote 4.png" alt="Tuote4" />
+            <h3>Kannettava powerbank 10 000 mAh</h3>
+            <div class="price">29,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+        <!-- Uudet tuotteet -->
+        <article class="product-card" data-kategoria="Tarvikkeet">
+            <img src="tuote5.png" alt="Tuote5" />
+            <h3>USB-C laturi 65W</h3>
+            <div class="price">24,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+        <article class="product-card" data-kategoria="Älylaitteet">
+            <img src="tuote6.png" alt="Tuote6" />
+            <h3>Älykäs LED-lamppu</h3>
+            <div class="price">14,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+        <article class="product-card" data-kategoria="Tarvikkeet">
+            <img src="tuote7.png" alt="Tuote7" />
+            <h3>Langaton hiiri</h3>
+            <div class="price">19,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+        <article class="product-card" data-kategoria="Elektroniikka">
+            <img src="tuote8.png" alt="Tuote8" />
+            <h3>Bluetooth-kuulokkeet</h3>
+            <div class="price">49,90 €</div>
+            <button class="add-to-cart">Osta nyt</button>
+        </article>
+    </section>
+
+
+    <!-- Ostoskori Modal -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-content">
+            <span class="close-btn" id="closeCart">&times;</span>
+            <h2>Ostoskorisi</h2>
+            <ul id="cartItems"></ul>
+            <div class="totals" id="cartTotals"></div>
+            <button class="checkout-btn" id="checkoutBtn">Osta tuotteet</button>
+        </div>
+    </div>
+
+    <!-- Maksulomake Modal -->
+    <div id="paymentModal" class="cart-modal">
+        <div class="cart-content">
+            <span class="close-btn" id="closePayment">&times;</span>
+            <h2>Syötä maksutiedot</h2>
+            <form id="paymentForm">
+                <label for="cardNumber">Kortin numero</label><br>
+                <input type="text" id="cardNumber" name="cardNumber" maxlength="19" required pattern="[0-9 ]{16,19}" style="width:100%;padding:8px;margin-bottom:10px;" placeholder="1234 5678 9012 3456"><br>
+                <label for="expiry">Voimassaoloaika</label><br>
+                <input type="text" id="expiry" name="expiry" maxlength="5" required pattern="[0-9]{2}/[0-9]{2}" style="width:100%;padding:8px;margin-bottom:10px;" placeholder="MM/YY"><br>
+                <label for="cvc">CVC</label><br>
+                <input type="text" id="cvc" name="cvc" maxlength="4" required pattern="[0-9]{3,4}" style="width:100%;padding:8px;margin-bottom:10px;" placeholder="123"><br>
+                <button type="submit" class="checkout-btn" id="payBtn">Maksa</button>
+                <div id="paymentError" style="color:red;margin-top:10px;display:none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div>© 2025 Trekno. Kaikki oikeudet pidätetään.</div>
+    </footer>
+
+    <script>
+        // Kirjautuminen-modal
+        const kirjauduBtn = document.getElementById("kirjauduBtn");
+        const kirjauduModal = document.getElementById("kirjauduModal");
+        const closeKirjaudu = document.getElementById("closeKirjaudu");
+        const kirjauduForm = document.getElementById("kirjauduForm");
+        const kirjauduError = document.getElementById("kirjauduError");
+        kirjauduBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            kirjauduError.style.display = "none";
+            kirjauduForm.reset();
+            kirjauduModal.style.display = "block";
+            setTimeout(() => kirjauduModal.classList.add("open"), 10);
+        });
+        closeKirjaudu.addEventListener("click", function() {
+            kirjauduModal.classList.remove("open");
+            setTimeout(() => kirjauduModal.style.display = "none", 700);
+        });
+        window.addEventListener("click", function(e) {
+            if (e.target === kirjauduModal) {
+                kirjauduModal.classList.remove("open");
+                setTimeout(() => kirjauduModal.style.display = "none", 700);
+            }
+        });
+        kirjauduForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            kirjauduError.textContent = "Kirjautumisessa oli ongelmia";
+            kirjauduError.style.display = "block";
+        });
+
+        // Tietoa meistä -näytä/piilota about-section
+        const tietoaMeistaBtn = document.getElementById("tietoaMeistaBtn");
+        const aboutSection = document.querySelector(".about-section");
+        tietoaMeistaBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            if (aboutSection.style.display === "none") {
+                aboutSection.style.display = "block";
+            } else {
+                aboutSection.style.display = "none";
+            }
+        });
+
+        // Yhteystiedot-modal
+        const yhteystiedotBtn = document.getElementById("yhteystiedotBtn");
+        const yhteystiedotModal = document.getElementById("yhteystiedotModal");
+        const closeYhteystiedot = document.getElementById("closeYhteystiedot");
+        yhteystiedotBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            yhteystiedotModal.style.display = "block";
+            setTimeout(() => yhteystiedotModal.classList.add("open"), 10);
+        });
+        closeYhteystiedot.addEventListener("click", function() {
+            yhteystiedotModal.classList.remove("open");
+            setTimeout(() => yhteystiedotModal.style.display = "none", 700);
+        });
+        window.addEventListener("click", function(e) {
+            if (e.target === yhteystiedotModal) {
+                yhteystiedotModal.classList.remove("open");
+                setTimeout(() => yhteystiedotModal.style.display = "none", 700);
+            }
+        });
+
+        // Haku-toiminto
+        const searchInput = document.getElementById("searchInput");
+        const searchBtn = document.getElementById("searchBtn");
+        searchBtn.addEventListener("click", function() {
+            const query = searchInput.value.trim().toLowerCase();
+            productCards.forEach(card => {
+                const name = card.querySelector("h3").innerText.toLowerCase();
+                if (name.includes(query) || query === "") {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+        searchInput.addEventListener("keyup", function(e) {
+            if (e.key === "Enter") searchBtn.click();
+        });
+
+        // Kategoriat dropdown ja suodatus
+        const kategoriatBtn = document.getElementById("kategoriatBtn");
+        const kategoriatDropdown = document.getElementById("kategoriatDropdown");
+        kategoriatBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            kategoriatDropdown.style.display = kategoriatDropdown.style.display === "block" ? "none" : "block";
+        });
+        document.addEventListener("click", function(e) {
+            if (!kategoriatBtn.contains(e.target) && !kategoriatDropdown.contains(e.target)) {
+                kategoriatDropdown.style.display = "none";
+            }
+        });
+
+        // Suodatuslogiikka
+        const kategoriaLinks = kategoriatDropdown.querySelectorAll("a");
+        const productCards = document.querySelectorAll(".product-card");
+        kategoriaLinks.forEach(link => {
+            link.addEventListener("click", function(ev) {
+                ev.preventDefault();
+                const kategoria = link.textContent.trim();
+                productCards.forEach(card => {
+                    if (kategoria === "Kaikki tuotteet" || card.getAttribute("data-kategoria") === kategoria) {
+                        card.style.display = "flex";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+                kategoriatDropdown.style.display = "none";
+            });
+        });
+
+        // Hytkyminen scrollatessa alas
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > lastScrollY && window.scrollY > 50) {
+                document.body.classList.add('shake');
+                setTimeout(() => {
+                    document.body.classList.remove('shake');
+                }, 700);
+            }
+            lastScrollY = window.scrollY;
+        });
+        let cart = [];
+        const cartBtn = document.getElementById("cartBtn");
+        const cartModal = document.getElementById("cartModal");
+        const closeCart = document.getElementById("closeCart");
+        const cartItems = document.getElementById("cartItems");
+        const cartTotals = document.getElementById("cartTotals");
+    const addToCartBtns = document.querySelectorAll(".add-to-cart");
+    // Maksumodaali
+    const paymentModal = document.getElementById("paymentModal");
+    const closePayment = document.getElementById("closePayment");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const paymentForm = document.getElementById("paymentForm");
+    const paymentError = document.getElementById("paymentError");
+
+        function updateCart() {
+            cartItems.innerHTML = "";
+            if (cart.length === 0) {
+                cartItems.innerHTML = "<li>Ostoskorisi on tyhjä</li>";
+                cartTotals.innerHTML = "";
+                return;
+            }
+
+            let total = 0;
+            cart.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.textContent = item.name + " - " + item.price.toFixed(2) + " €";
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "Poista";
+                removeBtn.className = "remove-btn";
+                removeBtn.addEventListener("click", () => {
+                    cart.splice(index, 1);
+                    updateCart();
+                });
+                li.appendChild(removeBtn);
+                cartItems.appendChild(li);
+                total += item.price;
+            });
+
+            const vat = total * 0.24;
+            const grandTotal = total + vat;
+            cartTotals.innerHTML = `
+                Välisumma: ${total.toFixed(2)} € <br>
+                ALV (24%): ${vat.toFixed(2)} € <br>
+                <strong>Yhteensä: ${grandTotal.toFixed(2)} €</strong>
+            `;
+        }
+
+
+        function showCartModal() {
+            cartModal.style.display = "block";
+            setTimeout(() => {
+                cartModal.classList.add("open");
+            }, 10);
+        }
+
+        function showPaymentModal() {
+            paymentModal.style.display = "block";
+            setTimeout(() => {
+                paymentModal.classList.add("open");
+            }, 10);
+        }
+
+
+        function hideCartModal() {
+            cartModal.classList.remove("open");
+            setTimeout(() => {
+                cartModal.style.display = "none";
+            }, 700); // sama kuin transition-aika
+        }
+
+        function hidePaymentModal() {
+            paymentModal.classList.remove("open");
+            setTimeout(() => {
+                paymentModal.style.display = "none";
+            }, 700);
+        }
+
+        addToCartBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const productCard = btn.closest(".product-card");
+                const name = productCard.querySelector("h3").innerText;
+                const priceText = productCard.querySelector(".price").innerText.replace("€","").replace(",",".").trim();
+                const price = parseFloat(priceText);
+                cart.push({ name, price });
+                updateCart();
+                showCartModal();
+            });
+        });
+
+        cartBtn.addEventListener("click", () => {
+            updateCart();
+            showCartModal();
+        });
+
+        closeCart.addEventListener("click", () => {
+            hideCartModal();
+        });
+
+        closePayment.addEventListener("click", () => {
+            hidePaymentModal();
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target == cartModal) {
+                hideCartModal();
+            }
+            if (e.target == paymentModal) {
+                hidePaymentModal();
+            }
+        });
+
+        // Kun "Osta tuotteet" painetaan, avaa maksulomake
+        checkoutBtn.addEventListener("click", () => {
+            hideCartModal();
+            paymentError.style.display = "none";
+            paymentForm.reset();
+            showPaymentModal();
+        });
+
+        // Kun "Maksa" painetaan, näytä virheviesti
+        paymentForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            paymentError.textContent = "Maksutapahtumassa oli ongelmia";
+            paymentError.style.display = "block";
+        });
+    </script>
+
+</body>
+</html>
